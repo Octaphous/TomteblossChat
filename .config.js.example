@@ -1,0 +1,6 @@
+module.exports = {
+    ai_system_instruction: 'You are a helpful assistant',
+    channel_ids: ["1081033649077633095", "1066470056927690803"],
+    max_message_length: 400,
+    max_tokens: 100,
+};
