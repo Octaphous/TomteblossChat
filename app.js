@@ -42,11 +42,19 @@ discordBot.on("messageCreate", async (message) => {
     addToHistory("user", message.content);
 
     // Get the response from OpenAI
-    const chatCompletion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo-0301",
-        max_tokens: config.max_tokens,
-        messages: [{ role: "system", content: config.ai_system_instruction }, ...history],
-    });
+    const chatCompletion = await openai
+        .createChatCompletion({
+            model: "gpt-3.5-turbo-0301",
+            max_tokens: config.max_tokens,
+            messages: [{ role: "system", content: config.ai_system_instruction }, ...history],
+        })
+        .catch((err) => {
+            console.error(err.message);
+        });
+
+    if (!chatCompletion || chatCompletion?.data?.error) {
+        return message.channel.send(config.error_msg);
+    }
 
     const response = chatCompletion.data.choices[0].message.content;
     console.log(`MSG: ${message.content}\nAI: ${response}\n-----------------`);

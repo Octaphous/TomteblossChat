@@ -5,4 +5,5 @@ module.exports = {
     max_tokens: 100,
     max_history: 3,
     assistant_history: true,
+    error_msg: "Error"
 };
