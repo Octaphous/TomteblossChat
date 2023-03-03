@@ -20,6 +20,12 @@ discordBot.on("ready", () => {
     console.log(`Logged in as ${discordBot.user.tag}!`);
 });
 
+const history = [];
+function addToHistory(role, content) {
+    history.push({ role, content });
+    if (history.length > config.max_history) history.shift();
+}
+
 discordBot.on("messageCreate", async (message) => {
     if (message.author.bot || !config.channel_ids.includes(message.channel.id)) return;
 
@@ -29,18 +35,21 @@ discordBot.on("messageCreate", async (message) => {
     // Check if the message is too long or too short
     if (message.content.length > config.max_message_length || message.content.length < 1) return;
 
+    addToHistory("user", message.content);
+
     // Get the response from OpenAI
     const chatCompletion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0301",
         max_tokens: config.max_tokens,
-        messages: [
-            { role: "system", content: config.ai_system_instruction },
-            { role: "user", content: message.content },
-        ],
+        messages: [{ role: "system", content: config.ai_system_instruction }, ...history],
     });
 
     const response = chatCompletion.data.choices[0].message.content;
     console.log(`MSG: ${message.content}\nAI: ${response}\n-----------------`);
+
+    if (config.assistant_history) {
+        addToHistory("assistant", response);
+    }
 
     message.channel.sendTyping();
 

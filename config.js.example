@@ -3,4 +3,6 @@ module.exports = {
     channel_ids: ["1081033649077633095", "1066470056927690803"],
     max_message_length: 400,
     max_tokens: 100,
+    max_history: 3,
+    assistant_history: true,
 };
