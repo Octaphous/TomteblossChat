@@ -32,8 +32,12 @@ discordBot.on("messageCreate", async (message) => {
     // Remove mentions from the message
     message.content = message.content.replace(/<@!?\d+>/g, "").trim();
 
-    // Check if the message is too long or too short
-    if (message.content.length > config.max_message_length || message.content.length < 1) return;
+    // Message length checks
+    if (message.content.length > config.max_message_length) {
+        message.content = message.content.substring(0, config.max_message_length);
+    } else if (message.content.length < 1) {
+        return;
+    }
 
     addToHistory("user", message.content);
 
