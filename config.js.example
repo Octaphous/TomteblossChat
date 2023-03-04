@@ -4,6 +4,7 @@ module.exports = {
     max_message_length: 400,
     max_tokens: 100,
     max_history: 3,
+    assistant_name: "Helpful Assistant",
     assistant_history: true,
     error_msg: "Error"
 };
