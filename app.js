@@ -29,17 +29,11 @@ function addToHistory(role, content) {
 discordBot.on("messageCreate", async (message) => {
     if (message.author.bot || !config.channel_ids.includes(message.channel.id)) return;
 
-    // Remove mentions from the message
-    message.content = message.content.replace(/<@!?\d+>/g, "").trim();
+    let messageText = message.cleanContent.trim().substring(0, config.max_message_length);
+    if (messageText.length === 0) return;
 
-    // Message length checks
-    if (message.content.length > config.max_message_length) {
-        message.content = message.content.substring(0, config.max_message_length);
-    } else if (message.content.length < 1) {
-        return;
-    }
-
-    addToHistory("user", message.content);
+    const messageAuthor = await message.guild.members.fetch(message.author);
+    addToHistory("user", encodeMessage(messageText, messageAuthor.displayName));
 
     // Get the response from OpenAI
     const chatCompletion = await openai
@@ -56,11 +50,11 @@ discordBot.on("messageCreate", async (message) => {
         return message.channel.send(config.error_msg);
     }
 
-    const response = chatCompletion.data.choices[0].message.content;
+    const response = decodeMessage(chatCompletion.data.choices[0].message.content);
     console.log(`MSG: ${message.content}\nAI: ${response}\n-----------------`);
 
     if (config.assistant_history) {
-        addToHistory("assistant", response);
+        addToHistory("assistant", encodeMessage(response, config.assistant_name || "Assistant"));
     }
 
     message.channel.sendTyping();
@@ -69,3 +63,13 @@ discordBot.on("messageCreate", async (message) => {
         message.channel.send(response);
     }, 2500);
 });
+
+function encodeMessage(text, username) {
+    let encoded = `${username} says:`;
+    for (const line of text.trim().split(/\r?\n/)) encoded += `\n    ${line}`;
+    return encoded;
+}
+
+function decodeMessage(encoded) {
+    return encoded.replace(/^.+ says:\s*?\n?/, "").replace(/^    /gm, "");
+}
