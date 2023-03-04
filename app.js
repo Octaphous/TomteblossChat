@@ -65,11 +65,11 @@ discordBot.on("messageCreate", async (message) => {
 });
 
 function encodeMessage(text, username) {
-    let encoded = `${username} says:`;
-    for (const line of text.trim().split(/\r?\n/)) encoded += `\n    ${line}`;
+    let encoded = `${username}:`;
+    for (const line of text.trim().split(/\r?\n/)) encoded += `\n | ${line}`;
     return encoded;
 }
 
 function decodeMessage(encoded) {
-    return encoded.replace(/^.+ says:\s*?\n?/, "").replace(/^    /gm, "");
+    return encoded.replace(/^.+?:\s*?\n?/, "").replace(/^\s*\|\s?/gm, "");
 }
